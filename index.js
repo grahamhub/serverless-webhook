@@ -8,6 +8,7 @@
   If you want to serve up static assets, just put them in the '/static' folder
 */
 import { api, data, schedule, params } from '@serverless/cloud'
+import axios from 'axios';
 
 /* 
  * Create a route to GET our TODO items
@@ -117,6 +118,30 @@ schedule.every("60 minutes", async () => {
     // Here we could send an alert
     console.log(`ALERT: '${item.value.name}' is overdue!!!`);
   }
+});
+
+/*
+  Let's remind ourselves of our todos every two hours
+*/
+schedule.every('2 hours', async () => {
+  let incompleteTodos = await getTodos('incomplete', {})
+  let content;
+
+  if (incompleteTodos.items.length === 0) {
+    content = 'All todos complete!'
+  } else {
+    content = 'Incomplete todos:\n'
+    incompleteTodos.items.forEach(todo => content += `- ${todo.name}\n`)
+  }
+
+  console.log(content)
+
+  axios.post(params.DISCORD_WEBHOOK, {
+      content,
+    })
+    .catch(error => {
+      console.log(error)
+    })
 });
 
 
