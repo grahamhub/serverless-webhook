@@ -1,5 +1,5 @@
 import { schedule, data } from "@serverless/cloud";
-import { jest } from "@jest/globals";
+import { expect, jest, test } from "@jest/globals";
 
 const log = jest.spyOn(console, "log");
 
@@ -25,4 +25,10 @@ test("alerts on overdue items", async () => {
   await schedule.every("60 minutes").invoke();
 
   expect(log).toBeCalledWith("ALERT: 'Overdue item' is overdue!!!");
+});
+
+test("alerts on incomplete items", async () => {
+  await schedule.every("2 hours").invoke();
+
+  expect(log).toBeCalledWith("Incomplete todos:\n- Overdue item\n");
 });
